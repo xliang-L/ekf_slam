@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt  # 导入所需要的库
 
 
 class Gena_TSP(object):
-    def __init__(self, data, maxgen=200, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8):
+    def __init__(self, data, maxgen=1500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
         self.maxgen = maxgen  # 最大迭代次数
         self.size_pop = size_pop  # 群体个数
         self.cross_prob = cross_prob  # 交叉概率
         self.pmuta_prob = pmuta_prob  # 变异概率
         self.select_prob = select_prob  # 选择概率
-
+        self.distance = distance
         self.data = data  # 城市的左边数据
         self.num = len(data)  # 城市个数 对应染色体长度
 
@@ -45,17 +45,35 @@ class Gena_TSP(object):
             self.chrom[i,:]= rand_ch
             self.fitness[i] = self.comp_fit(rand_ch)
     def comp_fit(self, one_path):
+        b = np.where(one_path == 0)[0][0]
+        # one_path = np.concatenate(one_path)
+        one_path =np.concatenate([one_path[b:],one_path[0:]])
         res = 0
+
+        dis = self.distance
         for i in range(self.num-1):
-            res += self.matrix_distance[one_path[i],one_path[i+1]]
+            if dis > self.matrix_distance[one_path[i],one_path[i+1]] + self.matrix_distance[one_path[i+ 1],one_path[0]] :
+                res += self.matrix_distance[one_path[i],one_path[i+1]]
+                dis -= self.matrix_distance[one_path[i],one_path[i+1]]
+            else:
+                res += self.matrix_distance[one_path[i],one_path[0]]
+                res += self.matrix_distance[one_path[0],one_path[i+1]]
+                dis = self.distance
+                dis -= self.matrix_distance[one_path[i+ 1],one_path[0]]
+
         res += self.matrix_distance[one_path[-1],one_path[0]]
         return res
     def out_path(self, one_path):
+        b = np.where(one_path == 0)[0][0]
+        # one_path = np.concatenate(one_path)
+        one_path =np.concatenate([one_path[b:],one_path[0:]])
+
         res = str(one_path[0]+1)+'-->'
         for i in range(1, self.num):
             res += str(one_path[i]+1)+'-->'
         res += str(one_path[0]+1)+'\n'
         print(res)
+
     def select_sub(self):
         fit = 1./(self.fitness) #适应度函数
         cumsum_fit = np.cumsum(fit)
@@ -69,6 +87,37 @@ class Gena_TSP(object):
             else:
                 i += 1
         self.sub_sel = self.chrom[index,:]
+        # for
+            # print(self.sub_sel[i])
+
+        # print(self.sub_sel.shape,'sub_sel')
+    def out_put(self):
+        one_path = self.chrom[0]
+        print(one_path, 'one_paht')
+        b = np.where(one_path == 0)[0][0]
+        # one_path = np.concatenate(one_path)
+        one_path =np.concatenate([one_path[b:],one_path[0:b]])
+        print(one_path,'one_paht')
+        dis = self.distance
+        path = np.array(0)
+        list = []
+        j = 0
+        for i in range(self.num-1):
+            if dis > self.matrix_distance[one_path[i],one_path[i+1]] + self.matrix_distance[one_path[i+ 1],one_path[0]] :
+                dis -= self.matrix_distance[one_path[i],one_path[i+1]]
+            else:
+                dis = self.distance
+                # print(one_path[0:i], np.array(one_path[0]).reshape(-1))
+                path  = np.concatenate([one_path[j:i],np.array(one_path[0]).reshape(-1)])
+                j = i
+                list.append(path)
+                dis -= self.matrix_distance[one_path[i+ 1],np.array(one_path[0]).reshape(-1)]
+                # print(one_path[0:i],path)
+        path = np.concatenate([one_path[j:self.num], np.array(one_path[0]).reshape(-1)])
+        list.append(path)
+        return  list
+
+
     def cross_sub(self):
         if self.select_num % 2 == 0:
             num = range(0, self.select_num, 2)
@@ -121,6 +170,10 @@ class Gena_TSP(object):
         index = np.argsort(self.fitness)[::-1]
         self.chrom[index[:self.select_num],:] = self.sub_sel
 
+        # for i in self.chrom:
+
+        # print(type(self.chrom))
+
 def draw(data,Path_short):
     fig, ax = plt.subplots()
     x = data[:, 0]
@@ -128,19 +181,23 @@ def draw(data,Path_short):
     ax.scatter(x, y, linewidths=0.1)
     for i, txt in enumerate(range(1, len(data) + 1)):
         ax.annotate(txt, (x[i], y[i]))
-    res0 = Path_short.chrom[0]
-    x0 = x[res0]
-    y0 = y[res0]
-    for i in range(len(data) - 1):
-        plt.quiver(x0[i], y0[i], x0[i + 1] - x0[i], y0[i + 1] - y0[i], color='r', width=0.005, angles='xy', scale=1,
+    # res0 = Path_short.chrom[0]
+    res = Path_short.out_put()
+    for res0 in res:
+        print(res0)
+        # print(re)
+        x0 = x[res0]
+        y0 = y[res0]
+        for i in range(len(res0) - 1):
+            plt.quiver(x0[i], y0[i], x0[i + 1] - x0[i], y0[i + 1] - y0[i], color='r', width=0.005, angles='xy', scale=1,
+                       scale_units='xy')
+        plt.quiver(x0[-1], y0[-1], x0[0] - x0[-1], y0[0] - y0[-1], color='r', width=0.005, angles='xy', scale=1,
                    scale_units='xy')
-    plt.quiver(x0[-1], y0[-1], x0[0] - x0[-1], y0[0] - y0[-1], color='r', width=0.005, angles='xy', scale=1,
-               scale_units='xy')
     plt.show()
     # print('路程: ' + str(Path_short.fitness[0]))
 
 
-def main(data):
+def TSP(data):
     Path_short = Gena_TSP(data)  # 根据位置坐标，生成一个遗传算法类
     Path_short.rand_chrom()  # 初始化父类
 
@@ -161,10 +218,12 @@ def main(data):
 
         # 每隔三十步显示当前群体的最优路径
         index = Path_short.fitness.argmin()
+        # print(index)
         if (i + 1) % 30 == 0:
             print('第' + str(i + 1) + '步后的最短的路程: ' + str(Path_short.fitness[index]))
             print('第' + str(i + 1) + '步后的最优路径:')
             # draw(data, Path_short)
+            # print(Path_short.chrom)
             Path_short.out_path(Path_short.chrom[index, :])  # 显示每一步的最优路径
 
         # 存储每一步的最优路径及距离
@@ -178,5 +237,6 @@ if __name__ == '__main__':
                      22.39, 93.37, 25.23, 97.24, 22.00, 96.05, 20.47, 97.02,
                      17.20, 96.29, 16.30, 97.38, 14.05, 98.12, 16.53, 97.38,
                      21.52, 95.59, 19.41, 97.13, 20.09, 92.55]).reshape(14, 2)
-    main(data)
-    draw(data, main(data))
+    print(data)
+    draw(data, TSP(data))
+
