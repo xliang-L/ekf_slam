@@ -27,7 +27,7 @@ ld = np.append(ld,landmark_v,axis=1)
 
 # In[Define and initialize robot parameters]
 # fov 是视野
-fov = 80
+fov = 10
 
 Rt = 5*np.array([[0.1,0,0],
                [0,0.01,0],
@@ -40,6 +40,9 @@ x_init = [0,0,0.5*np.pi]
 r1 = Robot(x_init, fov, Rt, Qt)
 
 # In[Generate inputs and measurements]
+
+
+
 
 steps = 30
 stepsize = 3
@@ -81,13 +84,6 @@ for movement, t in zip(u,range(steps)):
     # process robot movement
     x_true.append(r1.move(movement))
     obs.append(r1.sense(landmarks))
-# print(len(obs))
-# for i in obs:
-#     print(i)
-#
-# import time
-# time.sleep(100)
-
 
 plotMap(ls,ldt,x_true,r1,mapsize)
 
@@ -117,17 +113,17 @@ print(r1,mapsize)
 #
 #
 #
-# for movement, measurement in zip(u, obs):
-#     mu_new, cov = predict(mu_new, cov, movement, Rt)
-#     mu = np.append(mu,mu_new,axis=1)
-#     plotEstimate(mu, cov, r1, mapsize)
-#
-#     print('Measurements: {0:d}'.format(len(measurement)))
-#     mu_new, cov, c_prob_new = update(mu_new, cov, measurement, c_prob[:,-1].reshape(n+k,1), Qt)
-#     mu = np.append(mu,mu_new,axis=1)
-#     c_prob = np.append(c_prob, c_prob_new, axis=1)
-#     plotEstimate(mu, cov, r1, mapsize)
-#     plotMeasurement(mu_new, cov, measurement, n)
-#
-#     plotError(mu,x_true[:len(mu[:,0::2])][:])
-#     print('----------')
+for movement, measurement in zip(u, obs):
+    mu_new, cov = predict(mu_new, cov, movement, Rt)
+    mu = np.append(mu,mu_new,axis=1)
+    plotEstimate(mu, cov, r1, mapsize)
+
+    print('Measurements: {0:d}'.format(len(measurement)))
+    mu_new, cov, c_prob_new = update(mu_new, cov, measurement, c_prob[:,-1].reshape(n+k,1), Qt)
+    mu = np.append(mu,mu_new,axis=1)
+    c_prob = np.append(c_prob, c_prob_new, axis=1)
+    plotEstimate(mu, cov, r1, mapsize)
+    plotMeasurement(mu_new, cov, measurement, n,mapsize)
+
+    plotError(mu,x_true[:len(mu[:,0::2])][:])
+    print('----------')

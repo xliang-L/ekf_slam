@@ -8,13 +8,13 @@ Created on Thu Oct 11 21:14:20 2018
 import numpy as np
 
 class Robot:
-    def __init__(self, x_init, fov, Rt, Qt):
+    def __init__(self, x_init, r , Rt, Qt):
         x_init[2] = (x_init[2]+np.pi)%(2*np.pi)-np.pi
 
         self.x_true = x_init
         
         self.lo = np.empty((0,3))
-        self.fov = np.deg2rad(fov)
+        self.r =  r
         
         # noise covariances
         self.Rt = Rt
@@ -49,15 +49,18 @@ class Robot:
         
         x = self.x_true
         observation = np.empty((0,3))
-        
-        fovL = (x[2]+self.fov/2+2*np.pi)%(2*np.pi)
-        fovR = (x[2]-self.fov/2+2*np.pi)%(2*np.pi)
+
+        # fovL = (x[2]+self.fov/2+2*np.pi)%(2*np.pi)
+        # fovR = (x[2]-self.fov/2+2*np.pi)%(2*np.pi)
         
         for landmark in lt:
+            meas_range = np.sqrt(np.power(landmark[1] - x[1], 2) + np.power(landmark[0] - x[0], 2)) + self.Qt[0][
+                0] * np.random.randn(1)
             rel_angle = np.arctan2((landmark[1]-x[1]),(landmark[0]-x[0]))
             rel_angle_2pi = (np.arctan2((landmark[1]-x[1]),(landmark[0]-x[0]))+2*np.pi)%(2*np.pi)
             # TODO: re-include and debug field of view constraints
-            if (fovL - rel_angle_2pi + np.pi) % (2*np.pi) - np.pi > 0 and (fovR - rel_angle_2pi + np.pi) % (2*np.pi) - np.pi < 0:
+            # if (fovL - rel_angle_2pi + np.pi) % (2*np.pi) - np.pi > 0 and (fovR - rel_angle_2pi + np.pi) % (2*np.pi) - np.pi < 0:
+            if self.r > meas_range :
                 meas_range = np.sqrt(np.power(landmark[1]-x[1],2)+np.power(landmark[0]-x[0],2)) + self.Qt[0][0]*np.random.randn(1)
                 meas_bearing = (rel_angle - x[2] + self.Qt[1][1]*np.random.randn(1) + np.pi)%(2*np.pi)-np.pi
                 observation = np.append(observation,[[meas_range[0], meas_bearing[0], landmark[2]]],axis=0)
