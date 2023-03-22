@@ -2,7 +2,10 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/DVRP" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/EKF-SLAM" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/PyQt5-YOLOv5" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/insertion-heuristic-for-dynamic-vehicle-routing-problem-dvrp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/simple_vrptw" vcs="Git" />
   </component>
 </project>

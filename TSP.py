@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt  # 导入所需要的库
 
 
 class Gena_TSP(object):
-    def __init__(self, data, maxgen=1500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
-        self.maxgen = maxgen  # 最大迭代次数
+    def __init__(self, data, maxgen=2500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
+        self.maxgen = 500  # 最大迭代次数
         self.size_pop = size_pop  # 群体个数
         self.cross_prob = cross_prob  # 交叉概率
         self.pmuta_prob = pmuta_prob  # 变异概率
@@ -58,6 +58,7 @@ class Gena_TSP(object):
             else:
                 res += self.matrix_distance[one_path[i],one_path[0]]
                 res += self.matrix_distance[one_path[0],one_path[i+1]]
+                res += dis
                 dis = self.distance
                 dis -= self.matrix_distance[one_path[i+ 1],one_path[0]]
 
@@ -106,15 +107,16 @@ class Gena_TSP(object):
             if dis > self.matrix_distance[one_path[i],one_path[i+1]] + self.matrix_distance[one_path[i+ 1],one_path[0]] :
                 dis -= self.matrix_distance[one_path[i],one_path[i+1]]
             else:
-                dis = self.distance
+
                 # print(one_path[0:i], np.array(one_path[0]).reshape(-1))
                 path  = np.concatenate([one_path[j:i],np.array(one_path[0]).reshape(-1)])
                 j = i
-                list.append(path)
+                list.append([path,dis])
+                dis = self.distance
                 dis -= self.matrix_distance[one_path[i+ 1],np.array(one_path[0]).reshape(-1)]
                 # print(one_path[0:i],path)
         path = np.concatenate([one_path[j:self.num], np.array(one_path[0]).reshape(-1)])
-        list.append(path)
+        list.append([path,dis])
         return  list
 
 
@@ -183,15 +185,19 @@ def draw(data,Path_short):
         ax.annotate(txt, (x[i], y[i]))
     # res0 = Path_short.chrom[0]
     res = Path_short.out_put()
-    for res0 in res:
-        print(res0)
+    cl = ['r','b','g','c','m','y','k']
+    for i in range(len(res)):
+        color = cl[i%7]
+        res0 = res[i][0]
+        print("第{}个路线剩余的distance = {}".format(i+1,res[i][1]))
+
         # print(re)
         x0 = x[res0]
         y0 = y[res0]
         for i in range(len(res0) - 1):
-            plt.quiver(x0[i], y0[i], x0[i + 1] - x0[i], y0[i + 1] - y0[i], color='r', width=0.005, angles='xy', scale=1,
+            plt.quiver(x0[i], y0[i], x0[i + 1] - x0[i], y0[i + 1] - y0[i], color=color, width=0.001, angles='xy', scale=1,
                        scale_units='xy')
-        plt.quiver(x0[-1], y0[-1], x0[0] - x0[-1], y0[0] - y0[-1], color='r', width=0.005, angles='xy', scale=1,
+        plt.quiver(x0[-1], y0[-1], x0[0] - x0[-1], y0[0] - y0[-1], color=color, width=0.001, angles='xy', scale=1,
                    scale_units='xy')
     plt.show()
     # print('路程: ' + str(Path_short.fitness[0]))

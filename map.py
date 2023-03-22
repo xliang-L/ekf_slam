@@ -4,16 +4,17 @@ import numpy as np
 
 
 class point:
-    def __init__(self,x,y):
+    def __init__(self,x,y,label = 1):
         self.x = x
         self.y = y
+        self.label = label
     def __getitem__(self, key):
         if key == 1 :
             return self.y
         elif key == 0 :
             return self.x
 class drone:
-    def __init__(self,x ,y ):
+    def __init__(self,x ,y ,):
 
         self.x = x
         self.y = y
@@ -62,7 +63,7 @@ class map:
             return np.array(list).reshape(-1,2)
 
 if __name__ == '__main__':
-    data = map(50)[:]
+    data = map(15)[:]
     print(data)
     TSP.draw(data, TSP.TSP(data))
 
