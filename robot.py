@@ -22,17 +22,25 @@ class Robot:
     
     def move(self,u):
         # Make noisy movement in environment
-        motion_noise = np.matmul(np.random.randn(1,3),self.Rt)[0]
-        [dtrans, drot1, drot2] = u[:3] + motion_noise
-        
+        # motion_noise = np.matmul(np.random.randn(1,3),self.Rt)[0]
+        # [dtrans, drot1, drot2] = u[:3] + motion_noise
+        [dtrans, drot1, drot2] = u[:3]
         x = self.x_true
         x_new = x[0] + dtrans*np.cos(x[2]+drot1)
         y_new = x[1] + dtrans*np.sin(x[2]+drot1)
         theta_new = (x[2] + drot1 + drot2 + np.pi) % (2*np.pi) - np.pi
-        
+
         self.x_true = [x_new, y_new, theta_new]
-        
+
         return self.x_true
+
+        # motion_noise = np.matmul(np.random.randn(1,3),self.Rt)[0]z
+        # d  = u[:3] + motion_noise
+        # self.x_true += d
+        return  self.x_true
+
+
+
     
     def sense(self,lt):
         # Make noisy observation of subset of landmarks in field of view

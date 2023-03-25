@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt  # 导入所需要的库
 
 
 class Gena_TSP(object):
-    def __init__(self, data, maxgen=2500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
+    def __init__(self, data, maxgen=500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
         self.maxgen = 500  # 最大迭代次数
-        self.size_pop = size_pop  # 群体个数
-        self.cross_prob = cross_prob  # 交叉概率
-        self.pmuta_prob = pmuta_prob  # 变异概率
-        self.select_prob = select_prob  # 选择概率
+        self.size_pop = size_pop  # 群体个数 200
+        self.cross_prob = cross_prob  # 交叉概率 0.9
+        self.pmuta_prob = pmuta_prob  # 变异概率0.01
+        self.select_prob = select_prob  # 选择概率 0.8
         self.distance = distance
         self.data = data  # 城市的左边数据
         self.num = len(data)  # 城市个数 对应染色体长度
@@ -18,19 +18,21 @@ class Gena_TSP(object):
         # 距离矩阵n*n, 第[i,j]个元素表示城市i到j距离matrix_dis函数见下文
 
         self.select_num = max(floor(self.size_pop * self.select_prob + 0.5), 2)
-        # 通过选择概率确定子代的选择个数
+        # 通过选择概率确定子代的选择个数    160
 
-        self.chrom = np.array([0] * self.size_pop * self.num).reshape(self.size_pop, self.num)
-        self.sub_sel = np.array([0] * self.select_num * self.num).reshape(self.select_num, self.num)
+        self.chrom = np.array([0] * self.size_pop * self.num).reshape(self.size_pop, self.num)   # 200 * 15
+        self.sub_sel = np.array([0] * self.select_num * self.num).reshape(self.select_num, self.num) # 160 * 15
         # 父代和子代群体的初始化（不直接用np.zeros是为了保证单个染色体的编码为整数，np.zeros对应的数据类型为浮点型）
 
-        self.fitness = np.zeros(self.size_pop)
+        self.fitness = np.zeros(self.size_pop) # 200  * 1
         # 存储群体中每个染色体的路径总长度，对应单个染色体的适应度就是其倒数
 
         self.best_fit = []
         self.best_path = []
         # 保存每一步的群体的最优路径和距离
 
+    # 计算距离矩阵,
+    # todo 这个之后改成输入式，不再在 这里计算
     def matrix_dis(self):
         res = np.zeros((self.num,self.num))
         for i in range(self.num):
@@ -38,16 +40,20 @@ class Gena_TSP(object):
                 res[i,j] = np.linalg.norm(self.data[i,:]-self.data[j,:])
                 res[j,i] = res[i,j]
         return res
+
+
+    # 随机生成的部分
     def rand_chrom(self):
         rand_ch = np.array(range(self.num))
         for i in range(self.size_pop):
             np.random.shuffle(rand_ch)
             self.chrom[i,:]= rand_ch
             self.fitness[i] = self.comp_fit(rand_ch)
+    #  计算适应度
     def comp_fit(self, one_path):
         b = np.where(one_path == 0)[0][0]
         # one_path = np.concatenate(one_path)
-        one_path =np.concatenate([one_path[b:],one_path[0:]])
+        one_path =np.concatenate([one_path[b:],one_path[0:b]])
         res = 0
 
         dis = self.distance
@@ -64,10 +70,12 @@ class Gena_TSP(object):
 
         res += self.matrix_distance[one_path[-1],one_path[0]]
         return res
+
+    # 输出一条路径
     def out_path(self, one_path):
         b = np.where(one_path == 0)[0][0]
         # one_path = np.concatenate(one_path)
-        one_path =np.concatenate([one_path[b:],one_path[0:]])
+        one_path =np.concatenate([one_path[b:],one_path[0:b]])
 
         res = str(one_path[0]+1)+'-->'
         for i in range(1, self.num):
@@ -75,10 +83,11 @@ class Gena_TSP(object):
         res += str(one_path[0]+1)+'\n'
         print(res)
 
+    # 轮盘赌  应该换成 锦标赛试一试
     def select_sub(self):
         fit = 1./(self.fitness) #适应度函数
         cumsum_fit = np.cumsum(fit)
-        pick = cumsum_fit[-1]/self.select_num*(np.random.rand()+np.array(range(self.select_num)))
+        pick = cumsum_fit[-1]/self.select_num *(np.random.rand()+np.array(range(self.select_num)))
         i,j = 0,0
         index = []
         while i<self.size_pop and j<self.select_num:
@@ -92,6 +101,8 @@ class Gena_TSP(object):
             # print(self.sub_sel[i])
 
         # print(self.sub_sel.shape,'sub_sel')
+
+    #     输出路径
     def out_put(self):
         one_path = self.chrom[0]
         print(one_path, 'one_paht')
@@ -109,17 +120,25 @@ class Gena_TSP(object):
             else:
 
                 # print(one_path[0:i], np.array(one_path[0]).reshape(-1))
-                path  = np.concatenate([one_path[j:i],np.array(one_path[0]).reshape(-1)])
+                if j == 0:
+                    path  = np.concatenate([one_path[j:i],np.array(one_path[0]).reshape(-1)])
+                else:
+                    path  = np.concatenate([np.array(one_path[0]).reshape(-1),one_path[j:i],np.array(one_path[0]).reshape(-1)])
+
                 j = i
                 list.append([path,dis])
                 dis = self.distance
                 dis -= self.matrix_distance[one_path[i+ 1],np.array(one_path[0]).reshape(-1)]
                 # print(one_path[0:i],path)
-        path = np.concatenate([one_path[j:self.num], np.array(one_path[0]).reshape(-1)])
+        if j == 0:
+            path  = np.concatenate([one_path[j:self.num],np.array(one_path[0]).reshape(-1)])
+        else:
+            path  = np.concatenate([np.array(one_path[0]).reshape(-1),one_path[j:self.num],np.array(one_path[0]).reshape(-1)])
+        # path = np.concatenate([one_path[j:self.num], np.array(one_path[0]).reshape(-1)])
         list.append([path,dis])
         return  list
 
-
+    # 交叉
     def cross_sub(self):
         if self.select_num % 2 == 0:
             num = range(0, self.select_num, 2)
@@ -128,6 +147,8 @@ class Gena_TSP(object):
         for i in num:
             if self.cross_prob >= np.random.rand():
                 self.sub_sel[i, :], self.sub_sel[i + 1, :] = self.intercross(self.sub_sel[i, :], self.sub_sel[i + 1, :])
+
+    #             变异部分
     def intercross(self, ind_a, ind_b):
         r1 = np.random.randint(self.num)
         r2 = np.random.randint(self.num)

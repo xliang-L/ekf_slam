@@ -38,8 +38,8 @@ def plotMap(ls,ldt,hist,robot,mapsize):
     for i in range(ldt.shape[2]):
         plt.scatter(ldt[:,0,i], ldt[:,1,i], s=10, marker="s", color=(0,1,0))
     
-    plt.xlim([-mapsize/2,mapsize/2])
-    plt.ylim([-mapsize/2,mapsize/2])
+    plt.xlim([0,mapsize])
+    plt.ylim([0,mapsize])
     plt.title('True environment')
     
     
@@ -87,8 +87,8 @@ def plotEstimate(mu, cov, robot, mapsize):
             plt.scatter(zx,zy,marker='s', s=10, color=(0,0,1))
     
     # plot settings
-    plt.xlim([-mapsize/2,mapsize/2])
-    plt.ylim([-mapsize/2,mapsize/2])
+    plt.xlim([0,mapsize])
+    plt.ylim([0,mapsize])
     plt.title('Observations and trajectory estimate')
     plt.pause(0.1)
     
@@ -112,17 +112,27 @@ def plotMeasurement(mu, cov, obs, n,mapsize):
         landmark_cov.set_fill(0)
         a.add_artist(landmark_cov)
         plt.pause(0.0001)
-        
+    plt.xlim([0,mapsize])
+    plt.ylim([0,mapsize])
     plt.pause(0.01)
 
 def plotError(mu,x_true):
+    # pass
+
     b = plt.subplot(143)
     mu = mu[:3,0::2] # keep only x,y,theta
-    x_true = (np.asarray(x_true).T)[:,:mu.shape[1]]
-    dif = np.power(np.abs(mu - x_true),2)
-    err = dif[0,:] + dif[1,:]
-    b.plot(err, color="r")
-    plt.title('Squared estimation error')
-    plt.xlabel('Steps')
-    plt.ylabel('Squared error')
+
+    y = (np.asarray(x_true).T)[:,:mu.shape[1]]
+    print(mu.shape)
+    # print(x_true.shape)
+    # mu = mu[:,:x_true.shape[1]]
+    try:
+        dif = np.power(np.abs(mu - y),2)
+        err = dif[0,:] + dif[1,:]
+        b.plot(err, color="r")
+        plt.title('Squared estimation error')
+        plt.xlabel('Steps')
+        plt.ylabel('Squared error')
+    except:
+        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 #    b.plot(dif[2,:])

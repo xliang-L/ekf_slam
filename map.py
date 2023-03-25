@@ -62,10 +62,17 @@ class map:
                 list.append(self.points[i - 1] [1])
             return np.array(list).reshape(-1,2)
 
+    def draw_map(self):
+        pass
+
 if __name__ == '__main__':
     data = map(15)[:]
-    print(data)
-    TSP.draw(data, TSP.TSP(data))
+    print(data.shape)
+    path = TSP.TSP(data)
+    print(path.out_put())
+    TSP.draw(data,path)
+    #
+    # TSP.TSP().out_put()
 
     # a = np.array([[4,5,6,1,2,3],[4,5,6,1,2,3]])
     # print(np.where(a == 1))
