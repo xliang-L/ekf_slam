@@ -66,10 +66,10 @@ class map:
         pass
 
 if __name__ == '__main__':
-    data = map(15)[:]
+    data = map(30)[:]
     print(data.shape)
     path = TSP.TSP(data)
-    print(path.out_put())
+    print(path.out_put(),'ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
     TSP.draw(data,path)
     #
     # TSP.TSP().out_put()

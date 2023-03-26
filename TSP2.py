@@ -1,20 +1,21 @@
 from math import floor
 import numpy as np
 import matplotlib.pyplot as plt  # 导入所需要的库
-
+from map import map
 
 class Gena_TSP(object):
-    def __init__(self, data, maxgen=500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
-        self.maxgen = 500  # 最大迭代次数
+    def __init__(self, data,self_num,matrix_distance,index, maxgen=500, size_pop=200, cross_prob=0.9, pmuta_prob=0.01, select_prob=0.8,distance = 300):
+        self.maxgen = maxgen  # 最大迭代次数
         self.size_pop = size_pop  # 群体个数 200
         self.cross_prob = cross_prob  # 交叉概率 0.9
         self.pmuta_prob = pmuta_prob  # 变异概率0.01
         self.select_prob = select_prob  # 选择概率 0.8
         self.distance = distance
         self.data = data  # 城市的左边数据
-        self.num = len(data)  # 城市个数 对应染色体长度
-
-        self.matrix_distance = self.matrix_dis()
+        self.num = self_num  # 城市个数 对应染色体长度
+        self.index = np.array(index)
+        # print(self.index.any(),'sdklfjaklsdflkajsdfjlkasdf')
+        self.matrix_distance = matrix_distance
         # 距离矩阵n*n, 第[i,j]个元素表示城市i到j距离matrix_dis函数见下文
 
         self.select_num = max(floor(self.size_pop * self.select_prob + 0.5), 2)
@@ -31,24 +32,35 @@ class Gena_TSP(object):
         self.best_path = []
         # 保存每一步的群体的最优路径和距离
 
-    # 计算距离矩阵,
-    # todo 这个之后改成输入式，不再在 这里计算
-    def matrix_dis(self):
-        res = np.zeros((self.num,self.num))
-        for i in range(self.num):
-            for j in range(i+1,self.num):
-                res[i,j] = np.linalg.norm(self.data[i,:]-self.data[j,:])
-                res[j,i] = res[i,j]
-        return res
-
-
     # 随机生成的部分
     def rand_chrom(self):
-        rand_ch = np.array(range(self.num))
-        for i in range(self.size_pop):
-            np.random.shuffle(rand_ch)
-            self.chrom[i,:]= rand_ch
-            self.fitness[i] = self.comp_fit(rand_ch)
+        if self.index.any() == None :
+            print('xxxxxxxxxxxxxxx')
+            rand_ch = np.array(range(self.num))
+            for i in range(self.size_pop):
+                np.random.shuffle(rand_ch)
+                self.chrom[i,:]= rand_ch
+                self.fitness[i] = self.comp_fit(rand_ch)
+        else:
+            print('yyyyyyyyyyyyyyy')
+            rand_ch = self.index
+            for i in range(self.size_pop):
+                # new_ch = self.init_sub_child(rand_ch)
+                self.chrom[i,:] = rand_ch
+                self.fitness[i] = self.comp_fit(rand_ch)
+    # def init_sub_child(self,ch):
+    #     r1 = np.random.randint(self.num)
+    #     r2 = np.random.randint(self.num)
+    #     while r2 == r1:
+    #         r2 = np.random.randint(self.num)
+    #     left, right = min(r1, r2), max(r1, r2)
+    #     print(left,right,ch)
+    #     np.random.shuffle(ch[left:right])
+    #     return ch
+
+
+
+
     #  计算适应度
     def comp_fit(self, one_path):
         b = np.where(one_path == 0)[0][0]
@@ -196,6 +208,14 @@ class Gena_TSP(object):
 
         # print(type(self.chrom))
 
+
+
+
+
+
+
+
+
 def draw(data,Path_short):
     fig, ax = plt.subplots()
     x = data[:, 0]
@@ -223,8 +243,10 @@ def draw(data,Path_short):
     # print('路程: ' + str(Path_short.fitness[0]))
 
 
-def TSP(data):
-    Path_short = Gena_TSP(data)  # 根据位置坐标，生成一个遗传算法类
+def TSP(data,self_num,matrix_distance,index,maxgen = 500):
+
+    Path_short = Gena_TSP(data,self_num,matrix_distance,index,maxgen = maxgen)  # 根据位置坐标，生成一个遗传算法类
+
     Path_short.rand_chrom()  # 初始化父类
 
     ## 绘制初始化的路径图
@@ -258,11 +280,35 @@ def TSP(data):
     return Path_short  # 返回遗传算法结果类
 
 
-if __name__ == '__main__':
-    data = np.array([16.47, 96.10, 16.47, 94.44, 20.09, 92.54,
-                     22.39, 93.37, 25.23, 97.24, 22.00, 96.05, 20.47, 97.02,
-                     17.20, 96.29, 16.30, 97.38, 14.05, 98.12, 16.53, 97.38,
-                     21.52, 95.59, 19.41, 97.13, 20.09, 92.55]).reshape(14, 2)
-    print(data)
-    draw(data, TSP(data))
 
+def matrix_dis(self_num,self_data):
+    res = np.zeros((self_num,self_num))
+    for i in range(self_num):
+        for j in range(i+1,self_num):
+            res[i,j] = np.linalg.norm(self_data[i,:]-self_data[j,:])
+            res[j,i] = res[i,j]
+    return res
+
+
+# def test_out(he ):
+#     he =  0
+#     return  he
+if __name__ == '__main__':
+    data = map(25)[:]
+    self_num = len(data)
+    index = [i for i in range(self_num)]
+    matrix_distance = matrix_dis(self_num,data)
+    print(index,matrix_distance.shape)
+    path = TSP(data,self_num,matrix_distance,index = index,maxgen = 500)
+
+
+
+    # print(path)
+    draw(data, path)
+    res = path.out_put()
+    for i in range(len(res)):
+
+        path = TSP(data,res[i][0][:-1].shape[0],matrix_distance,index = res[i][0][:-1],maxgen = 90)
+        draw(data, path)
+    # print(path.out_put())
+    # TSP.draw(data, path)

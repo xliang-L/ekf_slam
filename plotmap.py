@@ -96,8 +96,8 @@ def plotMeasurement(mu, cov, obs, n,mapsize):
 
     a = plt.subplot(144, aspect='equal')
     plt.cla()
-    plt.xlim([-mapsize/2,mapsize/2])
-    plt.ylim([-mapsize/2,mapsize/2])
+    plt.xlim([0,mapsize])
+    plt.ylim([0,mapsize])
     for z in obs:
         j = int(z[2])
         zx = mu[2*j+3]

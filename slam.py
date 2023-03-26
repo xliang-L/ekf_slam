@@ -9,7 +9,7 @@ import TSP
 
 # In[Generate static landmarks]
 
-n = 15# number of static landmarks
+n = 30# number of static landmarks
 mapsize = 100
 
 landmark_x = map(n)[:]
@@ -55,7 +55,7 @@ x_init = [0,0,0.5*np.pi]
 stepsize = 3
 curviness = 0.5
 
-x_true = [x_init]
+
 obs = []
 
 # generate input sequence
@@ -67,6 +67,7 @@ path = TSP.TSP(landmark_x)
 TSP.draw(landmark_x,path)
 path = path.out_put()
 for pathdssdss in path:
+    x_true = [x_init]
     self = [0, 0, 0.5 * np.pi]
     obs = []
     r1 = Robot(x_init, fov, Rt, Qt)
